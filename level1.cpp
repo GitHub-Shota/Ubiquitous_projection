@@ -16,7 +16,6 @@ void mouse_callback(int event, int x, int y, int flags, void* userdata){
 
 int main()
 {
-   
     imshow("example", img);
     setMouseCallback("example", mouse_callback);
     waitKey();
