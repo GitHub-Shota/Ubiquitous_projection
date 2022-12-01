@@ -1,24 +1,63 @@
-#include <opencv2\opencv.hpp>
 #include <iostream>
+#include <opencv2\opencv.hpp>
+#include <opencv2\highgui\highgui.hpp>
 
-using namespace std;
-using namespace cv;
-Mat img(Size(1920, 1080), CV_8UC3, Scalar(0, 0, 0));
+// 右クリックの状態（押された状態:1, 離した状態:0）
+bool is_click = 0;
 
-void mouse_callback(int event, int x, int y, int flags, void* userdata){
-    if (event == EVENT_MOUSEMOVE) {
-        cv::circle(img, cv::Point(x, y), 3, cv::Scalar(0, 0, 255), -1, cv::LINE_AA);
-        cout << "(" << x << ", " << y << ")" << endl;
-        imshow("example", img);
-        waitKey();
+// 座標
+int global_x = 960, global_y = 540;
+
+// パソコンサイズの黒画面
+cv::Mat img(cv::Size(1920, 1080), CV_8UC3, cv::Scalar(0, 0, 0));
+
+// 点を描写
+void draw_circle(int event, int x, int y, int flags, void* userdata)
+{
+    global_x = x;
+    global_y = y;
+
+    // 右クリック押下
+    if (event == cv::EVENT_RBUTTONDOWN)
+    {
+        is_click = 1;
+    }
+
+    // 左クリック離す
+    if (event == cv::EVENT_RBUTTONUP)
+    {
+        is_click = 0;
     }
 }
 
-int main()
-{
-    imshow("example", img);
-    setMouseCallback("example", mouse_callback);
-    waitKey();
+int main() {
+
+    // 表示するウィンドウに名前を付ける
+    cv::namedWindow("Level1", cv::WINDOW_AUTOSIZE);
+    cv::setMouseCallback("Level1", draw_circle);
+
+    // qが押されるまで表示を継続
+    while (1) 
+    {
+        cv::imshow("Level1", img);
+
+        // 右クリックされている状態に点を描写
+        if (is_click == 1)
+        {
+            cv::circle(img, cv::Point(global_x, global_y), 3, cv::Scalar(0, 0, 255), -1, cv::LINE_AA);
+            std::cout << "(" << global_x << ", " << global_y << ")" << std::endl;
+        }
+
+        int key = cv::waitKey(1);
+        // qボタンが押されたときwhileループから抜ける
+        if (key == 113) 
+        {
+            break;
+        }
+    }
+
+    // ウィンドウを閉じる
+    cv::destroyAllWindows();
 
     return 0;
 }
