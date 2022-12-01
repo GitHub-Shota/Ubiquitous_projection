@@ -5,14 +5,14 @@
 // 右クリックの状態（押された状態:1, 離した状態:0）
 bool is_click = 0;
 
-// 座標
-int global_x = 960, global_y = 540;
+// グローバル座標
+int global_x = 0, global_y = 0;
 
 // パソコンサイズの黒画面
 cv::Mat img(cv::Size(1920, 1080), CV_8UC3, cv::Scalar(0, 0, 0));
 
-// 点を描写
-void draw_circle(int event, int x, int y, int flags, void* userdata)
+// グローバル変数に座標を代入
+void get_xy(int event, int x, int y, int flags, void* userdata)
 {
     global_x = x;
     global_y = y;
@@ -30,11 +30,15 @@ void draw_circle(int event, int x, int y, int flags, void* userdata)
     }
 }
 
-int main() {
+int main() 
+{
 
     // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level1", cv::WINDOW_AUTOSIZE);
-    cv::setMouseCallback("Level1", draw_circle);
+    cv::namedWindow("Level1", cv::WINDOW_NORMAL);
+    // フルスクリーン表示
+    cv::setWindowProperty("Level1", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    cv::setMouseCallback("Level1", get_xy);
+
 
     // qが押されるまで表示を継続
     while (1) 
@@ -48,8 +52,8 @@ int main() {
             std::cout << "(" << global_x << ", " << global_y << ")" << std::endl;
         }
 
-        int key = cv::waitKey(1);
         // qボタンが押されたときwhileループから抜ける
+        int key = cv::waitKey(1);
         if (key == 113) 
         {
             break;
