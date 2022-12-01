@@ -6,16 +6,18 @@
 bool is_click = 0;
 
 // グローバル座標
-int global_x = 0, global_y = 0;
+int old_x = 0, old_y = 0, new_x = 0, new_y = 0;
 
 // パソコンサイズの黒画面
 cv::Mat img(cv::Size(1920, 1080), CV_8UC3, cv::Scalar(0, 0, 0));
 
-// グローバル変数に座標を代入
-void get_xy(int event, int x, int y, int flags, void* userdata)
+// 線を描写
+void draw_line(int event, int x, int y, int flags, void* userdata)
 {
-    global_x = x;
-    global_y = y;
+    old_x = new_x;
+    old_y = new_y;
+    new_x = x;
+    new_y = y;
 
     // 右クリック押下
     if (event == cv::EVENT_RBUTTONDOWN)
@@ -23,7 +25,13 @@ void get_xy(int event, int x, int y, int flags, void* userdata)
         is_click = 1;
     }
 
-    // 左クリック離す
+    // 右クリックされている状態に点を描写
+    if (is_click == 1)
+    {
+        cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), cv::Scalar(0, 255, 0), 10, cv::LINE_AA);
+    }
+
+    // 右クリック離す
     if (event == cv::EVENT_RBUTTONUP)
     {
         is_click = 0;
@@ -37,24 +45,16 @@ int main()
     cv::namedWindow("Level1", cv::WINDOW_NORMAL);
     // フルスクリーン表示
     cv::setWindowProperty("Level1", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-    cv::setMouseCallback("Level1", get_xy);
-
+    cv::setMouseCallback("Level1", draw_line);
 
     // qが押されるまで表示を継続
-    while (1) 
+    while (1)
     {
         cv::imshow("Level1", img);
 
-        // 右クリックされている状態に点を描写
-        if (is_click == 1)
-        {
-            cv::circle(img, cv::Point(global_x, global_y), 3, cv::Scalar(0, 0, 255), -1, cv::LINE_AA);
-            std::cout << "(" << global_x << ", " << global_y << ")" << std::endl;
-        }
-
-        // qボタンが押されたときwhileループから抜ける
         int key = cv::waitKey(1);
-        if (key == 113) 
+        // qボタンが押されたときwhileループから抜ける
+        if (key == 113)
         {
             break;
         }
