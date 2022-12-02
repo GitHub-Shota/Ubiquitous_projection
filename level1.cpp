@@ -2,8 +2,8 @@
 #include <opencv2\opencv.hpp>
 #include <opencv2\highgui\highgui.hpp>
 
-// 右クリックの状態（押された状態:1, 離した状態:0）
-bool is_click = 0;
+// 右クリックの状態（押された状態:true, 離した状態:false）
+bool is_clicked = false;
 
 // グローバル座標
 int old_x = 0, old_y = 0, new_x = 0, new_y = 0;
@@ -19,14 +19,14 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
     new_x = x;
     new_y = y;
 
-    // 右クリック押下
+    // 右クリック押す
     if (event == cv::EVENT_RBUTTONDOWN)
     {
-        is_click = 1;
+        is_clicked = true;
     }
 
     // 右クリックされている状態に点を描写
-    if (is_click == 1)
+    if (is_clicked == true)
     {
         cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), cv::Scalar(0, 255, 0), 10, cv::LINE_AA);
     }
@@ -34,7 +34,7 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
     // 右クリック離す
     if (event == cv::EVENT_RBUTTONUP)
     {
-        is_click = 0;
+        is_clicked = false;
     }
 }
 
@@ -53,10 +53,16 @@ int main()
         cv::imshow("Level1", img);
 
         int key = cv::waitKey(1);
-        // qボタンが押されたときwhileループから抜ける
+
+        // qキーが押されたときwhileループから抜ける(quit)
         if (key == 113)
         {
             break;
+        }
+        // rキーで全消し(reset)
+        else if (key == 114)
+        {
+            cv::circle(img, cv::Point(new_x, new_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
         }
     }
 
