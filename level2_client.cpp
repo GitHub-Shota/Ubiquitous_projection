@@ -56,17 +56,17 @@ int main()
 {
     /*
     // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level1", cv::WINDOW_NORMAL);
+    cv::namedWindow("Level2_client", cv::WINDOW_NORMAL);
     // フルスクリーン表示
-    cv::setWindowProperty("Level1", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    cv::setWindowProperty("Level2_client", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     // マウスイベントの登録
-    cv::setMouseCallback("Level1", draw_line);
+    cv::setMouseCallback("Level2_client", draw_line);
 
     // qが押されるまで表示を継続
     while (1)
     {
-        cv::imshow("Level1", img);
+        cv::imshow("Level2_client", img);
 
         int key = cv::waitKey(1);
 
