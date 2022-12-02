@@ -45,6 +45,8 @@ int main()
     cv::namedWindow("Level1", cv::WINDOW_NORMAL);
     // フルスクリーン表示
     cv::setWindowProperty("Level1", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    
+    // マウスイベントの登録
     cv::setMouseCallback("Level1", draw_line);
 
     // qが押されるまで表示を継続
