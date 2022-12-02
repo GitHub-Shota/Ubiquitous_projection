@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <string.h>
+#include <WinSock2.h> //windows
+#include <Windows.h>
+#include <windowsx.h>
+
+#pragma comment(lib, "ws2_32.lib")
+#pragma warning(disable:4996) // inet_addr()関数で警告が出る場合は以下で警告を無効化する。
+
+
+int main() {
+    WSAData wsaData;
+    WSAStartup(MAKEWORD(2, 0), &wsaData);   //MAKEWORD(2, 0)はwinsockのバージョン2.0ってこと
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);  //AF_INETはIPv4、SOCK_DGRAMはUDP通信、0は？
+
+    sock = socket(AF_INET, SOCK_DGRAM, 0);  //AF_INETはIPv4、SOCK_DGRAMはUDP通信、0は？
+
+    // アドレス等格納
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;  //IPv4
+    addr.sin_port = htons(50008);   //通信ポート番号設定
+    addr.sin_addr.S_un.S_addr = INADDR_ANY; // INADDR_ANYはすべてのアドレスからのパケットを受信する
+    bind(sock, (struct sockaddr*)&addr, sizeof(addr));
+
+    // ここで、ノンブロッキングに設定しています。
+    // u_long val = 1;
+    // ioctlsocket(sock, FIONBIO, &val);
+
+    // タイムアウト時間の設定
+    //struct timeval tv;
+    //tv.tv_sec = 0;
+    //tv.tv_usec = 10;
+    //if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(tv)) < 0) {
+    //  perror("Error");
+    //}
+
+    char old_xx[256];
+    char old_yy[256];
+    char new_xx[256];
+    char new_yy[256];
+
+
+    for (int i = 0; i < 100; i++) {
+        /*std::string rdata = udp0.recieve();
+        printf("recv:%s\n", rdata.c_str());*/
+        memset(old_xx, 0, 100);
+        recv(sock, old_xx, 100, 0);
+        printf("recv : %s \n", old_xx);
+
+        memset(old_yy, 0, 100);
+        recv(sock, old_yy, 100, 0);
+        printf("recv : %s \n", old_yy);
+
+        memset(new_xx, 0, 100);
+        recv(sock, new_xx, 100, 0);
+        printf("recv : %s \n", new_xx);
+
+        memset(new_yy, 0, 100);
+        recv(sock, new_yy, 100, 0);
+        printf("recv : %s \n", new_yy);
+
+        /*
+        if (recv(sock, &buf, 1, 0) >= 0)
+          printf("recv : %c \n", buf);*/
+    }
+
+    closesocket(sock);
+    WSACleanup();
+    return 0;
+}
