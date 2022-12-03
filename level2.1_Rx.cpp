@@ -17,6 +17,9 @@
 // inet_addr()関数で警告が出る場合は以下で警告を無効化
 #pragma warning(disable:4996)
 
+// バッファのサイズ
+#define BUFF_SIZE 8
+
 
 int main()
 {
@@ -102,25 +105,24 @@ int main()
         cv::imshow("Level2_client", img);
 
         // 受信用のバッファ
-        char old_xx[256];
-        char old_yy[256];
-        char new_xx[256];
-        char new_yy[256];
+        char old_xx[BUFF_SIZE];
+        char old_yy[BUFF_SIZE];
+        char new_xx[BUFF_SIZE];
+        char new_yy[BUFF_SIZE];
 
-        memset(old_xx, 0, 100);
-        recv(sock, old_xx, 100, 0);
+        // データ受信
+        // recv(ソケット, 受信データ, データのバイト数, フラグ);
+        // memset(メモリのポインタ, 値, サイズ);
+        recv(sock, old_xx, BUFF_SIZE, 0);
         old_x = atoi(old_xx);
 
-        memset(old_yy, 0, 100);
-        recv(sock, old_yy, 100, 0);
+        recv(sock, old_yy, BUFF_SIZE, 0);
         old_y = atoi(old_yy);
 
-        memset(new_xx, 0, 100);
-        recv(sock, new_xx, 100, 0);
+        recv(sock, new_xx, BUFF_SIZE, 0);
         new_x = atoi(new_xx);
 
-        memset(new_yy, 0, 100);
-        recv(sock, new_yy, 100, 0);
+        recv(sock, new_yy, BUFF_SIZE, 0);
         new_y = atoi(new_yy);
 
         // 受信した座標を基に線を描写
