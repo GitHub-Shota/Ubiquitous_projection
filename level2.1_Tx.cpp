@@ -17,6 +17,9 @@
 // inet_addr()関数で警告が出る場合は以下で警告を無効化
 #pragma warning(disable:4996)
 
+// バッファのサイズ
+#define BUFF_SIZE 8
+
 // 右クリックの状態（押された状態:true, 離した状態:false）
 bool is_clicked = false;
 
@@ -90,10 +93,10 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
     new_y = y;
 
     // 送信用のバッファ
-    char old_xx[256];
-    char old_yy[256];
-    char new_xx[256];
-    char new_yy[256];
+    char old_xx[BUFF_SIZE];
+    char old_yy[BUFF_SIZE];
+    char new_xx[BUFF_SIZE];
+    char new_yy[BUFF_SIZE];
 
     // 右クリック押す
     if (event == cv::EVENT_RBUTTONDOWN)
@@ -111,7 +114,7 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
         sprintf(new_yy, "%d", new_y);
 
         // データ送信
-        // sendto(ソケット, 送信するデータ, データのバイト数, フラグ, アドレス情報, アドレス情報のサイズ);
+        // sendto(ソケット, 送信データ, データのバイト数, フラグ, アドレス情報, アドレス情報のサイズ);
         sendto(sock, old_xx, sizeof(old_xx), 0, (struct sockaddr*)&addr, sizeof(addr));
         sendto(sock, old_yy, sizeof(old_yy), 0, (struct sockaddr*)&addr, sizeof(addr));
         sendto(sock, new_xx, sizeof(new_xx), 0, (struct sockaddr*)&addr, sizeof(addr));
@@ -140,7 +143,7 @@ int main()
     // 表示するウィンドウに名前を付ける
     cv::namedWindow("Level2.1_Tx", cv::WINDOW_NORMAL);
     // フルスクリーン表示
-    cv::setWindowProperty("Level2.1_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    //cv::setWindowProperty("Level2.1_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     // マウスイベントの登録
     cv::setMouseCallback("Level2.1_Tx", draw_line);
