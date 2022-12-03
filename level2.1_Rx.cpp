@@ -102,7 +102,7 @@ int main()
 
     while (1)
     {
-        cv::imshow("Level2_client", img);
+        cv::imshow("Level2.1_Rx", img);
 
         // 受信用のバッファ
         char old_xx[BUFF_SIZE];
@@ -127,19 +127,6 @@ int main()
 
         // 受信した座標を基に線を描写
         cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), cv::Scalar(0, 255, 0), 10, cv::LINE_AA);
-
-        // キーイベント
-        int key = cv::waitKey(1);
-        // qキーが押されたときwhileループから抜ける(quit)
-        if (key == 113)
-        {
-            break;
-        }
-        // rキーで全消し(reset)
-        else if (key == 114)
-        {
-            cv::circle(img, cv::Point(new_x, new_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
-        }
     }
 
     // ウィンドウを閉じる
