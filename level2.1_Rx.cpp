@@ -18,10 +18,10 @@
 #pragma warning(disable:4996)
 
 // バッファのサイズ
-#define BUFF_SIZE 8
+constexpr auto BUFF_SIZE = 8;
 
 
-int main()
+int main() 
 {
     // ソケット通信winsockの立ち上げ
     // wsaDataはエラー取得時に使用
@@ -59,7 +59,7 @@ int main()
     SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock == INVALID_SOCKET)
     {
-        std::cout << "socket failed" << std::endl;
+        std::cout << "Socket failed" << std::endl;
     }
 
     // アドレス等を格納
@@ -89,20 +89,20 @@ int main()
     // }
 
     // 座標
-    int old_x, old_y, new_x, new_y;
+    int old_x = 0, old_y = 0, new_x = 0, new_y = 0;
 
     // パソコンサイズの黒画面
     cv::Mat img(cv::Size(1920, 1080), CV_8UC3, cv::Scalar(0, 0, 0));
 
     // 表示するウィンドウに名前を付ける
     cv::namedWindow("Level2.1_Rx", cv::WINDOW_NORMAL);
-
     // フルスクリーン表示
     // cv::setWindowProperty("Level2.1_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     while (1)
     {
         cv::imshow("Level2.1_Rx", img);
+        cv::waitKey(1);
 
         // 受信用のバッファ
         char old_xx[BUFF_SIZE];
@@ -112,16 +112,25 @@ int main()
 
         // データ受信
         // recv(ソケット, 受信データ, データのバイト数, フラグ);
-        // memset(メモリのポインタ, 値, サイズ);
         recv(sock, old_xx, BUFF_SIZE, 0);
         old_x = atoi(old_xx);
 
+        // 送信側からのキーイベントを検知
+        // 最初だけ確認すればよい。
+        if (std::strcmp(old_xx, "quit") == 0)
+        {
+            break;
+        }
+        else if (std::strcmp(old_xx, "reset") == 0)
+        {
+            cv::circle(img, cv::Point(new_x, new_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+            continue;
+        }
+
         recv(sock, old_yy, BUFF_SIZE, 0);
         old_y = atoi(old_yy);
-
         recv(sock, new_xx, BUFF_SIZE, 0);
         new_x = atoi(new_xx);
-
         recv(sock, new_yy, BUFF_SIZE, 0);
         new_y = atoi(new_yy);
 
