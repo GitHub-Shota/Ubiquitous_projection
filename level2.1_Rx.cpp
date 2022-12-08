@@ -99,6 +99,11 @@ int main()
     // フルスクリーン表示
     // cv::setWindowProperty("Level2.1_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
+    // 線の色（初期状態は緑色）
+    cv::Scalar color = cv::Scalar(0, 255, 0);
+    // 線の太さ
+    int line_weight = 10;
+
     while (1)
     {
         cv::imshow("Level2.1_Rx", img);
@@ -126,6 +131,16 @@ int main()
             cv::circle(img, cv::Point(new_x, new_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
             continue;
         }
+        else if (std::strcmp(old_xx, "blue") == 0)
+        {
+            color = cv::Scalar(255, 0, 0);
+            continue;
+        }
+        else if (std::strcmp(old_xx, "green") == 0)
+        {
+            color = cv::Scalar(0, 255, 0);
+            continue;
+        }
 
         recv(sock, old_yy, BUFF_SIZE, 0);
         old_y = atoi(old_yy);
@@ -135,7 +150,7 @@ int main()
         new_y = atoi(new_yy);
 
         // 受信した座標を基に線を描写
-        cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), cv::Scalar(0, 255, 0), 10, cv::LINE_AA);
+        cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
     }
 
     // ウィンドウを閉じる
