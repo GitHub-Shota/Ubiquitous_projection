@@ -45,6 +45,11 @@ bool is_clicked = false;
 // グローバル座標
 int old_x = 0, old_y = 0, new_x = 0, new_y = 0;
 
+// 線の色（初期状態は緑色）
+cv::Scalar color = cv::Scalar(0, 255, 0);
+// 線の太さ
+int line_weight = 10;
+
 // パソコンサイズの黒画面
 cv::Mat img(cv::Size(1920, 1080), CV_8UC3, cv::Scalar(0, 0, 0));
 
@@ -93,11 +98,11 @@ int main()
     // {
     //     perror("Error");
     // }
-    
+
     // 表示するウィンドウに名前を付ける
     cv::namedWindow("Level2.1_Tx", cv::WINDOW_NORMAL);
     // フルスクリーン表示
-    //cv::setWindowProperty("Level2.1_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    // cv::setWindowProperty("Level2.1_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     // マウスイベントの登録
     cv::setMouseCallback("Level2.1_Tx", draw_line);
@@ -122,6 +127,20 @@ int main()
             char keyy[BUFF_SIZE] = "reset";
             sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
             cv::circle(img, cv::Point(new_x, new_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+        }
+        // bキーで線を青色に変更(blue)
+        else if (key == 98)
+        {
+            color = cv::Scalar(255, 0, 0);
+            char keyy[BUFF_SIZE] = "blue";
+            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
+        }
+        // gキーで線を緑色に変更(green)
+        else if (key == 103)
+        {
+            color = cv::Scalar(0, 255, 0);
+            char keyy[BUFF_SIZE] = "green";
+            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
         }
     }
 
@@ -175,7 +194,7 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
         sendto(sock, new_xx, sizeof(new_xx), 0, (struct sockaddr*)&addr, sizeof(addr));
         sendto(sock, new_yy, sizeof(new_yy), 0, (struct sockaddr*)&addr, sizeof(addr));
 
-        cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), cv::Scalar(0, 255, 0), 10, cv::LINE_AA);
+        cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
     }
 
     // 右クリック離す
