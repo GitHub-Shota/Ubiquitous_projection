@@ -187,6 +187,12 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
         sprintf(new_xx, "%d", new_x);
         sprintf(new_yy, "%d", new_y);
 
+        //ここで座標の出力をすると受信側の遅延0になるけど，送信側が飛び飛び
+        //std::cout << "old_x " << old_x << std::endl;
+        //std::cout << "old_y " << old_y << std::endl;
+        //std::cout << "new_x " << new_x << std::endl;
+        //std::cout << "new_y " << new_y << std::endl;
+
         // データ送信
         // sendto(ソケット, 送信データ, データのバイト数, フラグ, アドレス情報, アドレス情報のサイズ);
         sendto(sock, old_xx, sizeof(old_xx), 0, (struct sockaddr*)&addr, sizeof(addr));
