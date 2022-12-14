@@ -119,15 +119,6 @@ int main()
     //     perror("Error");
     // }
 
-
-    // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level2.2_Rx", cv::WINDOW_NORMAL);
-    // フルスクリーン表示
-    // cv::setWindowProperty("Level2.1_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-
-    cv::imshow("Level2.2_Rx", img);
-    cv::waitKey(1);
-
     std::thread th_a(recv_coordinates);
     std::thread th_b(draw_line);
 
@@ -202,20 +193,23 @@ void recv_coordinates()
         qx.push(new_x);
         qy.push(new_y);
 
-        std::cout << "old_x1 " << old_x << std::endl;
-        std::cout << "old_y1 " << old_y << std::endl;
-        std::cout << "new_x1 " << new_x << std::endl;
-        std::cout << "new_y1 " << new_y << std::endl;
+        
     }
 }
 
 // 動的配列に格納された座標を基に線を描写
 void draw_line()
 {
+    // 表示するウィンドウに名前を付ける
+    cv::namedWindow("Level2.2_Rx", cv::WINDOW_NORMAL);
+    // フルスクリーン表示
+    // cv::setWindowProperty("Level2.2_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+
     while (!is_ended)
     {
         cv::imshow("Level2.2_Rx", img);
         cv::waitKey(1);
+
         if (!(qx.empty() && qy.empty()))
         {
             // ブロックをロック
@@ -230,10 +224,7 @@ void draw_line()
             new_y = (int)qy.front();
             qy.pop();
 
-            std::cout << "old_x2 " << old_x << std::endl;
-            std::cout << "old_y2 " << old_y << std::endl;
-            std::cout << "new_x2 " << new_x << std::endl;
-            std::cout << "new_y2 " << new_y << std::endl;
+        
 
             // キューに格納された座標を基に線を描写
             cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
