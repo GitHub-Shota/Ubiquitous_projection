@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <queue>
+#include <vector>
 #include <thread>
 #include <mutex>
 #include <opencv2\opencv.hpp>
@@ -51,7 +52,7 @@ int old_x = 0, old_y = 0, new_x = 0, new_y = 0;
 std::queue<int> qx, qy;
 
 // 排他制御用ミューテックス
-std::mutex mtx;
+std::mutex mtx1, mtx2;
 
 // 終了判定（終了:true, 続行:false）
 bool is_ended = false;
@@ -151,6 +152,9 @@ void recv_coordinates()
 {
     while (!is_ended)
     {
+        // ブロックをロック
+        std::lock_guard<std::mutex> lock(mtx1);
+
         // 受信用のバッファ
         char old_xx[BUFF_SIZE];
         char old_yy[BUFF_SIZE];
@@ -198,8 +202,10 @@ void recv_coordinates()
         qx.push(new_x);
         qy.push(new_y);
 
-        std::cout << "old1 " << old_x << std::endl;
-        std::cout << "new1 " << new_x << std::endl;
+        std::cout << "old_x1 " << old_x << std::endl;
+        std::cout << "old_y1 " << old_y << std::endl;
+        std::cout << "new_x1 " << new_x << std::endl;
+        std::cout << "new_y1 " << new_y << std::endl;
     }
 }
 
@@ -213,19 +219,21 @@ void draw_line()
         if (!(qx.empty() && qy.empty()))
         {
             // ブロックをロック
-            std::lock_guard<std::mutex> lock(mtx);
+            std::lock_guard<std::mutex> lock(mtx2);
 
-            old_x = qx.front();
+            old_x = (int)qx.front();
             qx.pop();
-            old_y = qy.front();
+            old_y = (int)qy.front();
             qy.pop();
-            new_x = qx.front();
+            new_x = (int)qx.front();
             qx.pop();
-            new_y = qy.front();
+            new_y = (int)qy.front();
             qy.pop();
 
-            std::cout << "old2 " << old_x << std::endl;
-            std::cout << "new2 " << new_x << std::endl;
+            std::cout << "old_x2 " << old_x << std::endl;
+            std::cout << "old_y2 " << old_y << std::endl;
+            std::cout << "new_x2 " << new_x << std::endl;
+            std::cout << "new_y2 " << new_y << std::endl;
 
             // キューに格納された座標を基に線を描写
             cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
