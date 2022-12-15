@@ -12,7 +12,7 @@
 
 **各ファイルの説明**
 * level1.cpp：
-* level2.1_Rx.cpp：
+* level2.1_Rx.cpp：main文のwhileループ内で座標データを受信し、線を描写。
 * level2.1_Tx.cpp：
 * level2.2_Rx.cpp：
 * level2.2_Tx.cpp：
