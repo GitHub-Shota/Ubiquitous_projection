@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <queue>
-#include <vector>
 #include <thread>
 #include <mutex>
 #include <opencv2\opencv.hpp>
@@ -215,13 +214,13 @@ void draw_line()
             // ブロックをロック
             std::lock_guard<std::mutex> lock(mtx2);
 
-            old_x = (int)qx.front();
+            old_x = qx.front();
             qx.pop();
-            old_y = (int)qy.front();
+            old_y = qy.front();
             qy.pop();
-            new_x = (int)qx.front();
+            new_x = qx.front();
             qx.pop();
-            new_y = (int)qy.front();
+            new_y = qy.front();
             qy.pop();
 
         
