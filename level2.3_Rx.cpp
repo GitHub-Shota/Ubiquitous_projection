@@ -1,9 +1,7 @@
 #include <iostream>
 #include <string>
 #include <queue>
-#include <vector>
 #include <thread>
-#include <mutex>
 #include <opencv2\opencv.hpp>
 #include <opencv2\highgui\highgui.hpp>
 
@@ -51,9 +49,6 @@ int old_x2 = 0, old_y2 = 0, new_x2 = 0, new_y2 = 0;
 
 // 座標を格納するキュー
 std::queue<int> qx, qy;
-
-// 排他制御用ミューテックス
-std::mutex mtx1, mtx2;
 
 // 終了判定（終了:true, 続行:false）
 bool is_ended = false;
@@ -209,13 +204,13 @@ void draw_line()
 
         if (!(qx.empty() && qy.empty()))
         {
-            old_x2 = (int)qx.front();
+            old_x2 = qx.front();
             qx.pop();
-            old_y2 = (int)qy.front();
+            old_y2 = qy.front();
             qy.pop();
-            new_x2 = (int)qx.front();
+            new_x2 = qx.front();
             qx.pop();
-            new_y2 = (int)qy.front();
+            new_y2 = qy.front();
             qy.pop();
 
             // キューに格納された座標を基に線を描写
