@@ -91,9 +91,12 @@ int main()
         std::cout << "Socket failed" << std::endl;
     }
 
-    addr.sin_family = AF_INET;     // IPv4
-    addr.sin_port = htons(50008);  // 通信ポート番号設定
-    addr.sin_addr.S_un.S_addr = INADDR_ANY;  // INADDR_ANYはすべてのアドレスからのパケットを受信
+    // IPv4
+    addr.sin_family = AF_INET;
+    // 通信ポート番号設定
+    addr.sin_port = htons(50008);
+    // INADDR_ANYはすべてのアドレスからのパケットを受信
+    addr.sin_addr.S_un.S_addr = INADDR_ANY;
 
     // バインド
     // アドレス等の情報をsocketに登録
@@ -134,11 +137,11 @@ int main()
 }
 
 
-// 座標を受信し、動的配列に格納
+// 座標データを受信し、キューに格納
 void recv_coordinates()
 {
     while (!is_ended)
-    {        
+    {
         // 受信用のバッファ
         char old_xx[BUFF_SIZE];
         char old_yy[BUFF_SIZE];
@@ -180,7 +183,7 @@ void recv_coordinates()
     }
 }
 
-// 動的配列に格納された座標を基に線を描写
+// キューに格納された座標を基に線を描写
 void draw_line()
 {
     // 表示するウィンドウに名前を付ける
