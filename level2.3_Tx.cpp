@@ -166,12 +166,6 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
     new_x = x;
     new_y = y;
 
-    // 送信用のバッファ
-    char old_xx[BUFF_SIZE];
-    char old_yy[BUFF_SIZE];
-    char new_xx[BUFF_SIZE];
-    char new_yy[BUFF_SIZE];
-
     // 右クリック押す
     if (event == cv::EVENT_RBUTTONDOWN)
     {
@@ -181,17 +175,17 @@ void draw_line(int event, int x, int y, int flags, void* userdata)
     // 右クリックされている状態に座標送信と線を描写
     if (is_clicked == true)
     {
+        // 送信用のバッファ
+        char old_xx[BUFF_SIZE];
+        char old_yy[BUFF_SIZE];
+        char new_xx[BUFF_SIZE];
+        char new_yy[BUFF_SIZE];
+
         // 数値→文字列
         sprintf(old_xx, "%d", old_x);
         sprintf(old_yy, "%d", old_y);
         sprintf(new_xx, "%d", new_x);
         sprintf(new_yy, "%d", new_y);
-
-        //ここで座標の出力をすると受信側の遅延0になるけど，送信側が飛び飛び
-        //std::cout << "old_x " << old_x << std::endl;
-        //std::cout << "old_y " << old_y << std::endl;
-        //std::cout << "new_x " << new_x << std::endl;
-        //std::cout << "new_y " << new_y << std::endl;
 
         // データ送信
         // sendto(ソケット, 送信データ, データのバイト数, フラグ, アドレス情報, アドレス情報のサイズ);
