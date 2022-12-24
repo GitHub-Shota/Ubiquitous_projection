@@ -193,13 +193,13 @@ void recv_coordinates()
 void draw_line()
 {
     // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level2.2_Rx", cv::WINDOW_NORMAL);
+    cv::namedWindow("Level2.3_Rx", cv::WINDOW_NORMAL);
     // フルスクリーン表示
-    // cv::setWindowProperty("Level2.2_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    // cv::setWindowProperty("Level2.3_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     while (!is_ended)
     {
-        cv::imshow("Level2.2_Rx", img);
+        cv::imshow("Level2.3_Rx", img);
         cv::waitKey(1);
 
         if (!(qx.empty() && qy.empty()))
