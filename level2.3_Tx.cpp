@@ -100,17 +100,17 @@ int main()
     // }
 
     // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level2.2_Tx", cv::WINDOW_NORMAL);
+    cv::namedWindow("Level2.3_Tx", cv::WINDOW_NORMAL);
     // フルスクリーン表示
-    // cv::setWindowProperty("Level2.1_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    // cv::setWindowProperty("Level2.3_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     // マウスイベントの登録
-    cv::setMouseCallback("Level2.2_Tx", draw_line);
+    cv::setMouseCallback("Level2.3_Tx", draw_line);
 
     // qが押されるまで表示を継続
     while (1)
     {
-        cv::imshow("Level2.2_Tx", img);
+        cv::imshow("Level2.3_Tx", img);
 
         // キーイベント
         int key = cv::waitKey(1);
