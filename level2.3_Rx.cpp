@@ -202,7 +202,7 @@ void draw_line()
         cv::imshow("Level2.3_Rx", img);
         cv::waitKey(1);
 
-        if (!(qx.empty() && qy.empty()))
+        if (!(qx.empty() || qy.empty()))
         {
             old_x2 = qx.front();
             qx.pop();
