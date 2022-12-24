@@ -191,8 +191,6 @@ void recv_coordinates()
         qy.push(old_y);
         qx.push(new_x);
         qy.push(new_y);
-
-        
     }
 }
 
@@ -209,7 +207,7 @@ void draw_line()
         cv::imshow("Level2.2_Rx", img);
         cv::waitKey(1);
 
-        if (!(qx.empty() && qy.empty()))
+        if (!(qx.empty() || qy.empty()))
         {
             // ブロックをロック
             std::lock_guard<std::mutex> lock(mtx2);
@@ -222,8 +220,6 @@ void draw_line()
             qx.pop();
             new_y = qy.front();
             qy.pop();
-
-        
 
             // キューに格納された座標を基に線を描写
             cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
