@@ -22,7 +22,6 @@
 // プロトタイプ宣言
 void recv_coordinates();
 void draw_line();
-void set_x0y0();
 
 // ソケット通信winsockの立ち上げ
 // wsaDataはエラー取得時に使用
@@ -44,8 +43,9 @@ struct sockaddr_in addr;
 // バッファのサイズ
 constexpr auto BUFF_SIZE = 8;
 
-// 一つ前の座標
-int old_x = 0, old_y = 0;
+// グローバル座標
+int old_x1 = 0, old_y1 = 0, new_x1 = 0, new_y1 = 0;
+int old_x2 = 0, old_y2 = 0, new_x2 = 0, new_y2 = 0;
 
 // 座標を格納するキュー
 std::queue<int> qx, qy;
@@ -91,12 +91,9 @@ int main()
         std::cout << "Socket failed" << std::endl;
     }
 
-    // IPv4
-    addr.sin_family = AF_INET;
-    // 通信ポート番号設定
-    addr.sin_port = htons(50008);
-    // INADDR_ANYはすべてのアドレスからのパケットを受信
-    addr.sin_addr.S_un.S_addr = INADDR_ANY;
+    addr.sin_family = AF_INET;     // IPv4
+    addr.sin_port = htons(50008);  // 通信ポート番号設定
+    addr.sin_addr.S_un.S_addr = INADDR_ANY;  // INADDR_ANYはすべてのアドレスからのパケットを受信
 
     // バインド
     // アドレス等の情報をsocketに登録
@@ -137,7 +134,7 @@ int main()
 }
 
 
-// 座標データを受信し、キューに格納
+// 座標を受信し、動的配列に格納
 void recv_coordinates()
 {
     while (!is_ended)
@@ -145,11 +142,13 @@ void recv_coordinates()
         // 受信用のバッファ
         char old_xx[BUFF_SIZE];
         char old_yy[BUFF_SIZE];
+        char new_xx[BUFF_SIZE];
+        char new_yy[BUFF_SIZE];
 
         // データ受信
         // recv(ソケット, 受信データ, データのバイト数, フラグ);
         recv(sock, old_xx, BUFF_SIZE, 0);
-        int xx = atoi(old_xx);
+        old_x1 = atoi(old_xx);
 
         // 送信側からのキーイベントを検知
         // 最初だけ確認すればよい。
@@ -160,7 +159,17 @@ void recv_coordinates()
         }
         else if (std::strcmp(old_xx, "reset") == 0)
         {
-            cv::circle(img, cv::Point(old_x, old_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+            cv::circle(img, cv::Point(new_x1, new_y1), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+            continue;
+        }
+        else if (std::strcmp(old_xx, "black") == 0)
+        {
+            color = cv::Scalar(0, 0, 0);
+            continue;
+        }
+        else if (std::strcmp(old_xx, "white") == 0)
+        {
+            color = cv::Scalar(255, 255, 255);
             continue;
         }
         else if (std::strcmp(old_xx, "blue") == 0)
@@ -173,54 +182,59 @@ void recv_coordinates()
             color = cv::Scalar(0, 255, 0);
             continue;
         }
+        else if (std::strcmp(old_xx, "plus") == 0)
+        {
+            line_weight += 1;
+            continue;
+        }
+        else if (std::strcmp(old_xx, "minus") == 0)
+        {
+            line_weight -= 1;
+            continue;
+        }
 
         recv(sock, old_yy, BUFF_SIZE, 0);
-        int yy = atoi(old_yy);
+        old_y1 = atoi(old_yy);
+        recv(sock, new_xx, BUFF_SIZE, 0);
+        new_x1 = atoi(new_xx);
+        recv(sock, new_yy, BUFF_SIZE, 0);
+        new_y1 = atoi(new_yy);
 
         // キューにプッシュ
-        qx.push(xx);
-        qy.push(yy);
+        qx.push(old_x1);
+        qy.push(old_y1);
+        qx.push(new_x1);
+        qy.push(new_y1);
+
     }
 }
 
-// キューに格納された座標を基に線を描写
+// 動的配列に格納された座標を基に線を描写
 void draw_line()
 {
     // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level2.2_Rx", cv::WINDOW_NORMAL);
+    cv::namedWindow("Level2.4_Rx", cv::WINDOW_NORMAL);
     // フルスクリーン表示
-    // cv::setWindowProperty("Level2.2_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    // cv::setWindowProperty("Level2.4_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     while (!is_ended)
     {
-        cv::imshow("Level2.2_Rx", img);
+        cv::imshow("Level2.4_Rx", img);
         cv::waitKey(1);
 
-        if (!(qx.empty() && qy.empty()))
+        if (!(qx.empty() || qy.empty()))
         {
-            // 最初の初期値設定(1回だけ実行)
-            static std::once_flag flag;
-            std::call_once(flag, set_x0y0);
-
-            int new_x = qx.front();
+            old_x2 = qx.front();
             qx.pop();
-            int new_y = qy.front();
+            old_y2 = qy.front();
+            qy.pop();
+            new_x2 = qx.front();
+            qx.pop();
+            new_y2 = qy.front();
             qy.pop();
 
             // キューに格納された座標を基に線を描写
-            cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
-
-            // 一つ前の座標を更新
-            old_x = new_x;
-            old_y = new_y;
+            cv::line(img, cv::Point(old_x2, old_y2), cv::Point(new_x2, new_y2), color, line_weight, cv::LINE_AA);
         }
     }
-}
-
-void set_x0y0()
-{
-    old_x = qx.front();
-    qx.pop();
-    old_y = qy.front();
-    qy.pop();
 }
