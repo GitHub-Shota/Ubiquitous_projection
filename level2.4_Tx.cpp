@@ -1,8 +1,5 @@
 #include <iostream>
 #include <string>
-#include <queue>
-#include <thread>
-#include <mutex>
 #include <opencv2\opencv.hpp>
 #include <opencv2\highgui\highgui.hpp>
 
@@ -21,10 +18,7 @@
 #pragma warning(disable:4996)
 
 // プロトタイプ宣言
-void set_mousecallback();
-void send_coordinates(int event, int x, int y, int flags, void* userdata);
-void draw_line();
-void set_x0y0();
+void draw_line(int event, int x, int y, int flags, void* userdata);
 
 // ソケット通信winsockの立ち上げ
 // wsaDataはエラー取得時に使用
@@ -48,14 +42,8 @@ constexpr auto BUFF_SIZE = 8;
 // 右クリックの状態（押された状態:true, 離した状態:false）
 bool is_clicked = false;
 
-// 一つ前の座標
-int old_x = 0, old_y = 0;
-
-// 座標を格納するキュー
-std::queue<int> qx, qy;
-
-// 終了判定（終了:true, 続行:false）
-bool is_ended = false;
+// グローバル座標
+int old_x = 0, old_y = 0, new_x = 0, new_y = 0;
 
 // 線の色（初期状態は緑色）
 cv::Scalar color = cv::Scalar(0, 255, 0);
@@ -111,88 +99,19 @@ int main()
     //     perror("Error");
     // }
 
-    std::thread th_a(set_mousecallback);
-    std::thread th_b(draw_line);
-
-    th_a.join();
-    th_b.join();
-
-    // ウィンドウを閉じる
-    cv::destroyAllWindows();
-
-    // socketの破棄
-    closesocket(sock);
-
-    // すべてのスレッドのwinsockを終了
-    WSACleanup();
-
-    return 0;
-}
-
-
-// スレッド内でマウスコールバック関数を呼び出す
-void set_mousecallback()
-{
     // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level2.5_Tx", cv::WINDOW_NORMAL);
+    cv::namedWindow("Level2.4_Tx", cv::WINDOW_NORMAL);
     // フルスクリーン表示
-    // cv::setWindowProperty("Level2.5_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-    
+    // cv::setWindowProperty("Level2.4_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+
     // マウスイベントの登録
-    cv::setMouseCallback("Level2.5_Tx", send_coordinates);
-}
+    cv::setMouseCallback("Level2.4_Tx", draw_line);
 
-// キューに座標データを格納し、送信
-void send_coordinates(int event, int x, int y, int flags, void* userdata)
-{
-    cv::imshow("Level2.5_Tx", img);
-
-    // 右クリック押す
-    if (event == cv::EVENT_RBUTTONDOWN)
+    // qが押されるまで表示を継続
+    while (1)
     {
-        is_clicked = true;
-    }
+        cv::imshow("Level2.4_Tx", img);
 
-    // 右クリックされている状態に座標送信と線を描写
-    if (is_clicked == true)
-    {
-        // キューに格納
-        qx.push(x);
-        qy.push(y);
-
-        // 送信用のバッファ
-        char old_xx[BUFF_SIZE];
-        char old_yy[BUFF_SIZE];
-
-        // 数値→文字列
-        sprintf(old_xx, "%d", old_x);
-        sprintf(old_yy, "%d", old_y);
-
-        // データ送信
-        // sendto(ソケット, 送信データ, データのバイト数, フラグ, アドレス情報, アドレス情報のサイズ);
-        sendto(sock, old_xx, sizeof(old_xx), 0, (struct sockaddr*)&addr, sizeof(addr));
-        sendto(sock, old_yy, sizeof(old_yy), 0, (struct sockaddr*)&addr, sizeof(addr));
-    }
-
-    // 右クリック離す
-    if (event == cv::EVENT_RBUTTONUP)
-    {
-        is_clicked = false;
-    }
-}
-
-// キューに格納された座標を基に線を描写
-void draw_line()
-{
-    // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level2.5_Tx", cv::WINDOW_NORMAL);
-    // フルスクリーン表示
-    // cv::setWindowProperty("Level2.5_Tx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-
-    while (!is_ended)
-    {
-        cv::imshow("Level2.5_Tx", img);
-        
         // キーイベント
         int key = cv::waitKey(1);
         // qキーが押されたときwhileループから抜ける(quit)
@@ -200,15 +119,33 @@ void draw_line()
         {
             char keyy[BUFF_SIZE] = "quit";
             sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
-            is_ended = true;
             break;
+        }
+        // sキーで保存(save)
+        else if (key == 115)
+        {
+            cv::imwrite("output.png", img);
         }
         // rキーで全消し(reset)
         else if (key == 114)
         {
             char keyy[BUFF_SIZE] = "reset";
             sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
-            cv::circle(img, cv::Point(old_x, old_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+            cv::circle(img, cv::Point(new_x, new_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+        }
+        // eキーで線を黒色に変更(eraser)
+        else if (key == 101)
+        {
+            color = cv::Scalar(0, 0, 0);
+            char keyy[BUFF_SIZE] = "black";
+            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
+        }
+        // wキーで線を白色に変更(white)
+        else if (key == 119)
+        {
+            color = cv::Scalar(255, 255, 255);
+            char keyy[BUFF_SIZE] = "white";
+            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
         }
         // bキーで線を青色に変更(blue)
         else if (key == 98)
@@ -224,32 +161,82 @@ void draw_line()
             char keyy[BUFF_SIZE] = "green";
             sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
         }
-
-        // キューに座標が格納されている場合
-        if (!(qx.empty() && qy.empty()))
+        // pキーで線の太さを太くする(plus)
+        else if (key == 112)
         {
-            // 最初の初期値設定(1回だけ実行)
-            static std::once_flag flag;
-            std::call_once(flag, set_x0y0);
-
-            int new_x = qx.front();
-            qx.pop();
-            int new_y = qy.front();
-            qy.pop();
-
-            // キューに格納された座標を基に線を描写
-            cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
-
-            // 一つ前の座標を更新
-            old_x = new_x;
-            old_y = new_y;
+            line_weight += 1;
+            char keyy[BUFF_SIZE] = "plus";
+            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
+        }
+        // mキーで線の太さを細くする(minus)
+        else if (key == 109)
+        {
+            if (line_weight <= 1)
+            {
+                continue;
+            }
+            line_weight -= 1;
+            char keyy[BUFF_SIZE] = "minus";
+            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
         }
     }
+
+    // ウィンドウを閉じる
+    cv::destroyAllWindows();
+
+    // socketの破棄
+    closesocket(sock);
+
+    // すべてのスレッドのwinsockを終了
+    WSACleanup();
+
+    return 0;
 }
 
-// 座標の初期値設定
-void set_x0y0()
+
+// 座標の送信と線の描写
+void draw_line(int event, int x, int y, int flags, void* userdata)
 {
-    old_x = qx.front();
-    old_y = qy.front();
+    // 今の座標と一つ前の座標を更新
+    old_x = new_x;
+    old_y = new_y;
+    new_x = x;
+    new_y = y;
+
+    // 右クリック押す
+    if (event == cv::EVENT_RBUTTONDOWN)
+    {
+        is_clicked = true;
+    }
+
+    // 右クリックされている状態に座標送信と線を描写
+    if (is_clicked == true)
+    {
+        // 送信用のバッファ
+        char old_xx[BUFF_SIZE];
+        char old_yy[BUFF_SIZE];
+        char new_xx[BUFF_SIZE];
+        char new_yy[BUFF_SIZE];
+
+        // 数値→文字列
+        sprintf(old_xx, "%d", old_x);
+        sprintf(old_yy, "%d", old_y);
+        sprintf(new_xx, "%d", new_x);
+        sprintf(new_yy, "%d", new_y);
+
+        // データ送信
+        // sendto(ソケット, 送信データ, データのバイト数, フラグ, アドレス情報, アドレス情報のサイズ);
+        sendto(sock, old_xx, sizeof(old_xx), 0, (struct sockaddr*)&addr, sizeof(addr));
+        sendto(sock, old_yy, sizeof(old_yy), 0, (struct sockaddr*)&addr, sizeof(addr));
+        sendto(sock, new_xx, sizeof(new_xx), 0, (struct sockaddr*)&addr, sizeof(addr));
+        sendto(sock, new_yy, sizeof(new_yy), 0, (struct sockaddr*)&addr, sizeof(addr));
+
+        cv::line(img, cv::Point(old_x, old_y), cv::Point(new_x, new_y), color, line_weight, cv::LINE_AA);
+    }
+
+    // 右クリック離す
+    if (event == cv::EVENT_RBUTTONUP)
+    {
+        is_clicked = false;
+    }
 }
