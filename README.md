@@ -24,5 +24,5 @@
 * level2.2_Tx.cpp：level2.1_Tx.cppと同じ。
 * level2.3_Rx.cpp：排他制御なしでマルチスレッドを実装。
 * level2.3_Tx.cpp：level2.1_Tx.cppと同じ。
-* level2.4_Rx.cpp：排他制御なしでマルチスレッドを実装。
-* level2.4_Tx.cpp：排他制御なしでマルチスレッドを実装。
+* level2.4_Rx.cpp：level2.3_Rx.cppに機能を追加。
+* level2.4_Tx.cpp：level2.3_Tx.cppに機能を追加。
