@@ -130,8 +130,8 @@ int main()
         else if (key == 114)
         {
             char keyy[BUFF_SIZE] = "reset";
-            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));
-            cv::circle(img, cv::Point(new_x, new_y), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+            sendto(sock, keyy, sizeof(keyy), 0, (struct sockaddr*)&addr, sizeof(addr));           
+            cv::rectangle(img, cv::Point(0, 0), cv::Point(1920, 1080), cv::Scalar(0, 0, 0), cv::FILLED);
         }
         // eキーで線を黒色に変更(eraser)
         else if (key == 101)
