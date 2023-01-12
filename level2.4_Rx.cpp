@@ -22,6 +22,7 @@
 // プロトタイプ宣言
 void recv_coordinates();
 void draw_line();
+void show_window();
 
 // ソケット通信winsockの立ち上げ
 // wsaDataはエラー取得時に使用
@@ -117,9 +118,11 @@ int main()
 
     std::thread th_a(recv_coordinates);
     std::thread th_b(draw_line);
+    std::thread th_c(show_window);
 
     th_a.join();
     th_b.join();
+    th_c.join();
 
     // ウィンドウを閉じる
     cv::destroyAllWindows();
@@ -159,7 +162,7 @@ void recv_coordinates()
         }
         else if (std::strcmp(old_xx, "reset") == 0)
         {
-            cv::circle(img, cv::Point(new_x1, new_y1), 1920, cv::Scalar(0, 0, 0), -1, cv::LINE_AA);
+            cv::rectangle(img, cv::Point(0, 0), cv::Point(1920, 1080), cv::Scalar(0, 0, 0), cv::FILLED);
             continue;
         }
         else if (std::strcmp(old_xx, "black") == 0)
@@ -205,24 +208,15 @@ void recv_coordinates()
         qy.push(old_y1);
         qx.push(new_x1);
         qy.push(new_y1);
-
     }
 }
 
 // 動的配列に格納された座標を基に線を描写
 void draw_line()
-{
-    // 表示するウィンドウに名前を付ける
-    cv::namedWindow("Level2.4_Rx", cv::WINDOW_NORMAL);
-    // フルスクリーン表示
-    // cv::setWindowProperty("Level2.4_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-
+{    
     while (!is_ended)
     {
-        cv::imshow("Level2.4_Rx", img);
-        cv::waitKey(1);
-
-        if (!(qx.empty() || qy.empty()))
+        if ((qx.size() >= 2) && (qy.size() >= 2))
         {
             old_x2 = qx.front();
             qx.pop();
@@ -236,5 +230,20 @@ void draw_line()
             // キューに格納された座標を基に線を描写
             cv::line(img, cv::Point(old_x2, old_y2), cv::Point(new_x2, new_y2), color, line_weight, cv::LINE_AA);
         }
+    }
+}
+
+// ウィンドウを表示
+void show_window()
+{
+    // 表示するウィンドウに名前を付ける
+    cv::namedWindow("Level2.4_Rx", cv::WINDOW_NORMAL);
+    // フルスクリーン表示
+    // cv::setWindowProperty("Level2.4_Rx", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+
+    while (!is_ended)
+    {
+        cv::imshow("Level2.4_Rx", img);
+        cv::waitKey(1);
     }
 }
